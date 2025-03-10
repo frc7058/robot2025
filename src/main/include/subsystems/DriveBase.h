@@ -9,17 +9,19 @@
 #include <frc/smartdashboard/Field2d.h>
 #include <frc/controller/PIDController.h>
 #include <frc2/command/sysid/SysIdRoutine.h>
-#include <AHRS.h>
+#include <studica/AHRS.h>
 #include <array>
+#include <frc/SerialPort.h>
 
 #include "lib/SwerveModule.h"
-#include "lib/NavX.h"
-// #include "lib/Vision.h"
+//#include "lib/NavX.h"
+//#include "lib/Vision.h"
+
 
 class DriveBase : public frc2::SubsystemBase 
 {
 public:
-    DriveBase(Vision& vision);
+    DriveBase();
 
     void ConfigurePathPlanner();
 
@@ -36,10 +38,10 @@ public:
 
     void SetTargetModuleStates(const wpi::array<frc::SwerveModuleState, 4>& moduleStates);
 
-    void VisionUpdate();
+    //void VisionUpdate();
 
     void TrackHeading(units::radian_t heading);
-    // void TrackObject(units::radian_t heading);
+    void TrackObject(units::radian_t heading);
     void DisableTracking();
     bool IsTrackingEnabled() const;
 
@@ -83,7 +85,7 @@ private:
     units::radian_t m_navXOffset {0};
 
     // NavX IMU 
-    AHRS m_navX {frc::SerialPort::kUSB1};
+    studica::AHRS m_navX {studica::AHRS::NavXComType::kUSB1};
 
     // Vision class for AprilTag pose estimation
     // Vision& m_vision;

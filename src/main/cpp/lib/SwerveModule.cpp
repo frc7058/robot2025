@@ -4,33 +4,42 @@
 #include "constants/DriveConstants.h"
 #include <units/math.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <pathplanner/lib/commands/PathPlannerAuto.h>
+#include <rev/config/SparkMaxConfig.h>
+using namespace rev::spark;
+using namespace pathplanner;
 
 SwerveModule::SwerveModule(std::string name, int driveMotorCanID, int turnMotorCanID, int canCoderCanID, units::radian_t canCoderOffset)
     : m_name(name), m_encoderOffset(canCoderOffset)
 {
     fmt::print("Initializing Swerve Module {}\n", name);
 
-    m_driveMotor = std::make_unique<rev::CANSparkMax>(driveMotorCanID, rev::CANSparkMax::MotorType::kBrushless);
-    m_driveMotor->SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
-    // m_driveMotor->SetOpenLoopRampRate(constants::drive::rampRateSeconds);
+    // Drive motor
+    m_driveMotor = std::make_unique<rev::spark::SparkMax>(driveMotorCanID, rev::spark::SparkMax::MotorType::kBrushless);
 
-    m_turnMotor = std::make_unique<rev::CANSparkMax>(turnMotorCanID, rev::CANSparkMax::MotorType::kBrushless);
-    m_turnMotor->SetInverted(true);
-    m_turnMotor->SetIdleMode(rev::CANSparkBase::IdleMode::kBrake);
-
-    m_turnEncoder = std::make_unique<ctre::phoenix6::hardware::CANcoder>(canCoderCanID);
-
-    m_driveEncoder = std::make_unique<rev::SparkRelativeEncoder>(
-        m_driveMotor->GetEncoder(rev::SparkRelativeEncoder::Type::kHallSensor, constants::encoderCountsPerRev));
-    m_driveEncoder->SetAverageDepth(constants::drive::driveEncoderDepth);
-    m_driveEncoder->SetMeasurementPeriod(constants::drive::driveEncoderPeriod);
+    rev::spark::SparkMaxConfig driveMotorConfig;
+    driveMotorConfig.SetIdleMode(rev::spark::SparkBaseConfig::IdleMode::kBrake);
 
     units::meter_t positionConversionFactor = constants::drive::wheelCircumference / (constants::drive::driveGearRatio) * constants::drive::driveMeasurementFudgeFactor;
-    m_driveEncoder->SetPositionConversionFactor(positionConversionFactor.value());
-    
     units::meter_t velocityConversionFactor = positionConversionFactor / 60.0;
-    m_driveEncoder->SetVelocityConversionFactor(velocityConversionFactor.value());
 
+    driveMotorConfig.encoder.CountsPerRevolution(constants::encoderCountsPerRev)
+    .UvwAverageDepth(constants::drive::driveEncoderDepth)
+    .UvwMeasurementPeriod(constants::drive::driveEncoderPeriod)
+    .PositionConversionFactor(positionConversionFactor.value())
+    .VelocityConversionFactor(velocityConversionFactor.value());
+
+    m_driveMotor->Configure(driveMotorConfig, SparkBase::ResetMode::kResetSafeParameters, SparkBase::PersistMode::kPersistParameters);
+
+    // Turn motor 
+    m_turnMotor = std::make_unique<rev::spark::SparkMax>(turnMotorCanID, rev::spark::SparkMax::MotorType::kBrushless);
+    m_turnEncoder = std::make_unique<ctre::phoenix6::hardware::CANcoder>(canCoderCanID);
+
+    rev::spark::SparkMaxConfig turnMotorConfig;
+    turnMotorConfig.SetIdleMode(rev::spark::SparkBaseConfig::IdleMode::kBrake)
+    .Inverted(true);
+
+m_turnMotor->Configure(turnMotorConfig, SparkBase::ResetMode::kResetSafeParameters, SparkBase::PersistMode::kPersistParameters);
     m_drivePID = std::make_unique<frc::PIDController>(
         constants::drive::drivePID::p,
         constants::drive::drivePID::i,
@@ -56,7 +65,7 @@ SwerveModule::SwerveModule(std::string name, int driveMotorCanID, int turnMotorC
         constants::drive::driveFF::a);
 
     // Check if the motors or encoders have detected faults
-    bool faults_detected = ((m_driveMotor->GetStickyFaults() | m_turnMotor->GetStickyFaults() | m_turnEncoder->GetStickyFaultField().GetValue()) == 0);
+    bool faults_detected = ((m_driveMotor->GetStickyFaults() , m_turnMotor->GetStickyFaults() , m_turnEncoder->GetStickyFaultField().GetValue()) == 0); //// , used to be |
     bool okay = m_driveMotor && m_turnMotor && m_turnEncoder && m_driveEncoder && m_drivePID && m_turnPID && m_driveFeedForward;
 
     if(okay)

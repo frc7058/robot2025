@@ -13,9 +13,10 @@
 #include "constants/AutoConstants.h"
 #include "constants/GeneralConstants.h"
 #include "lib/Util.h"
+using namespace rev::spark;
+using namespace pathplanner;
 
-DriveBase::DriveBase(Vision& vision)
-    : m_vision(vision)
+DriveBase::DriveBase()
 {
     fmt::print("\nInitializing DriveBase...\n");
 
@@ -75,7 +76,7 @@ DriveBase::DriveBase(Vision& vision)
 
     InitializePreferences();
 
-    pathplanner::AutoBuilder::configureHolonomic(
+    pathplanner::AutoBuilder::configure(
         // Get pose
         [this] () { return this->GetPose(); },
 
@@ -92,6 +93,8 @@ DriveBase::DriveBase(Vision& vision)
 
         // Path follower config
         constants::autonomous::pathFollowerConfig,
+
+        constants::autonomous::config,
 
         // Boolean supplier for path mirroring
         [] () {
@@ -138,7 +141,7 @@ void DriveBase::Periodic()
 
     m_poseEstimator->Update(GetRotation2d(), GetSwerveModulePositions());
 
-    VisionUpdate();
+   // VisionUpdate();
 
     frc::SmartDashboard::PutNumber("X", GetPose().X().value());
     frc::SmartDashboard::PutNumber("Y", GetPose().Y().value());
@@ -202,7 +205,7 @@ void DriveBase::Drive(frc::ChassisSpeeds chassisSpeeds)
         units::radian_t currentTurnAngle = m_swerveModules[index]->GetTurnAngle();
 
         // Optimize module states to minimize the required turn angle
-        moduleState = frc::SwerveModuleState::Optimize(moduleState, frc::Rotation2d(currentTurnAngle));
+        moduleState.Optimize(frc::Rotation2d(currentTurnAngle));
     
         // Scale module speed by the cosine of angle error (to some power)
         // Reduces motor movement while modules are still turning to their target angle
@@ -232,22 +235,21 @@ void DriveBase::SetTargetModuleStates(const wpi::array<frc::SwerveModuleState, 4
     }
 }
 
-void DriveBase::VisionUpdate()
-{
-    frc::Pose3d currentPose(GetPose());
-    std::vector<std::optional<VisionPoseResult>> estimatedPoses = m_vision.GetEstimatedPoses(currentPose);
+//{
+   // frc::Pose3d currentPose(GetPose());
+   // std::vector<std::optional<VisionPoseResult>> estimatedPoses = m_vision.GetEstimatedPoses(currentPose);
 
-    for(std::optional<VisionPoseResult>& visionResult : estimatedPoses)
-    {
-        if(visionResult.has_value())
-        {
-            frc::Pose2d estimatedPose2d = visionResult->estimatedPose.estimatedPose.ToPose2d();
-            units::second_t timestamp = visionResult->estimatedPose.timestamp;
-            
-            m_poseEstimator->AddVisionMeasurement(estimatedPose2d, timestamp, visionResult->standardDeviations);
-        }
-    }
-}
+   // for(std::optional<VisionPoseResult>& visionResult : estimatedPoses)
+   // {
+    //   if(visionResult.has_value())
+     //   {
+      //      frc::Pose2d estimatedPose2d = visionResult->estimatedPose.estimatedPose.ToPose2d();
+       //     units::second_t timestamp = visionResult->estimatedPose.timestamp;
+        //    
+        //    m_poseEstimator->AddVisionMeasurement(estimatedPose2d, timestamp, visionResult->standardDeviations);
+       // }
+   // }
+//}
 
 void DriveBase::TrackHeading(units::radian_t heading)
 {
@@ -356,7 +358,7 @@ bool DriveBase::IsNavXAvailable()
 frc2::CommandPtr DriveBase::GetSysIdRoutine()
 {
     m_sysIdRoutine = std::make_unique<frc2::sysid::SysIdRoutine>(
-        frc2::sysid::Config(std::nullopt, std::nullopt, std::nullopt, std::nullopt),
+        frc2::sysid::Config(std::nullopt, std::nullopt, std::nullopt, nullptr),
 
         frc2::sysid::Mechanism(
             [this] (units::volt_t voltage)

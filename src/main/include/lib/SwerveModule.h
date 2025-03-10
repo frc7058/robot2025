@@ -6,7 +6,8 @@
 #include <frc/kinematics/SwerveModulePosition.h>
 #include <frc/kinematics/SwerveModuleState.h>
 #include <ctre/phoenix6/CANcoder.hpp>
-#include <rev/CANSparkMax.h>
+#include <rev/SparkMax.h>
+#include <rev/SparkRelativeEncoder.h>
 #include <units/velocity.h>
 #include <memory>
 #include <string>
@@ -51,13 +52,13 @@ public:
 
     void UpdateTurnEncoderOffset(units::radian_t offset);
     
-    std::unique_ptr<rev::CANSparkMax> m_driveMotor {};
-    std::unique_ptr<rev::CANSparkMax> m_turnMotor {};
+    std::unique_ptr<rev::spark::SparkMax> m_driveMotor {};
+    std::unique_ptr<rev::spark::SparkMax> m_turnMotor {};
 
 private:
     const std::string m_name {};
 
-    std::unique_ptr<rev::SparkRelativeEncoder> m_driveEncoder {};
+    std::unique_ptr<rev::spark::SparkRelativeEncoder> m_driveEncoder {};
     
     std::unique_ptr<ctre::phoenix6::hardware::CANcoder> m_turnEncoder {};
     units::radian_t m_encoderOffset {0};
