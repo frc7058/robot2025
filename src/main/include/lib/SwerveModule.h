@@ -8,6 +8,7 @@
 #include <ctre/phoenix6/CANcoder.hpp>
 #include <rev/SparkMax.h>
 #include <rev/SparkRelativeEncoder.h>
+#include <rev/config/SparkMaxConfig.h>
 #include <units/velocity.h>
 #include <memory>
 #include <string>
@@ -57,6 +58,9 @@ public:
 
 private:
     const std::string m_name {};
+
+    rev::spark::SparkMaxConfig m_driveMotorConfig;
+    rev::spark::SparkMaxConfig m_turnMotorConfig;
 
     std::unique_ptr<rev::spark::SparkRelativeEncoder> m_driveEncoder {};
     

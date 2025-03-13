@@ -5,9 +5,9 @@
 #include <units/math.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <pathplanner/lib/commands/PathPlannerAuto.h>
-#include <rev/config/SparkMaxConfig.h>
-using namespace rev::spark;
-using namespace pathplanner;
+
+using ResetMode = rev::spark::SparkBase::ResetMode;
+using PersistMode = rev::spark::SparkBase::PersistMode;
 
 SwerveModule::SwerveModule(std::string name, int driveMotorCanID, int turnMotorCanID, int canCoderCanID, units::radian_t canCoderOffset)
     : m_name(name), m_encoderOffset(canCoderOffset)
@@ -17,29 +17,25 @@ SwerveModule::SwerveModule(std::string name, int driveMotorCanID, int turnMotorC
     // Drive motor
     m_driveMotor = std::make_unique<rev::spark::SparkMax>(driveMotorCanID, rev::spark::SparkMax::MotorType::kBrushless);
 
-    rev::spark::SparkMaxConfig driveMotorConfig;
-    driveMotorConfig.SetIdleMode(rev::spark::SparkBaseConfig::IdleMode::kBrake);
-
     units::meter_t positionConversionFactor = constants::drive::wheelCircumference / (constants::drive::driveGearRatio) * constants::drive::driveMeasurementFudgeFactor;
     units::meter_t velocityConversionFactor = positionConversionFactor / 60.0;
 
-    driveMotorConfig.encoder.CountsPerRevolution(constants::encoderCountsPerRev)
-    .UvwAverageDepth(constants::drive::driveEncoderDepth)
-    .UvwMeasurementPeriod(constants::drive::driveEncoderPeriod)
-    .PositionConversionFactor(positionConversionFactor.value())
-    .VelocityConversionFactor(velocityConversionFactor.value());
+    m_driveMotorConfig.SetIdleMode(rev::spark::SparkBaseConfig::IdleMode::kBrake);
+    m_driveMotorConfig.encoder.CountsPerRevolution(constants::encoderCountsPerRev)
+        .UvwAverageDepth(constants::drive::driveEncoderDepth)
+        .UvwMeasurementPeriod(constants::drive::driveEncoderPeriod)
+        .PositionConversionFactor(positionConversionFactor.value())
+        .VelocityConversionFactor(velocityConversionFactor.value());
 
-    m_driveMotor->Configure(driveMotorConfig, SparkBase::ResetMode::kResetSafeParameters, SparkBase::PersistMode::kPersistParameters);
+    m_driveMotor->Configure(m_driveMotorConfig, ResetMode::kResetSafeParameters, PersistMode::kPersistParameters);
 
     // Turn motor 
     m_turnMotor = std::make_unique<rev::spark::SparkMax>(turnMotorCanID, rev::spark::SparkMax::MotorType::kBrushless);
     m_turnEncoder = std::make_unique<ctre::phoenix6::hardware::CANcoder>(canCoderCanID);
 
-    rev::spark::SparkMaxConfig turnMotorConfig;
-    turnMotorConfig.SetIdleMode(rev::spark::SparkBaseConfig::IdleMode::kBrake)
-    .Inverted(true);
+    m_turnMotorConfig.SetIdleMode(rev::spark::SparkBaseConfig::IdleMode::kBrake).Inverted(true);
 
-m_turnMotor->Configure(turnMotorConfig, SparkBase::ResetMode::kResetSafeParameters, SparkBase::PersistMode::kPersistParameters);
+m_turnMotor->Configure(m_turnMotorConfig, ResetMode::kResetSafeParameters, PersistMode::kPersistParameters);
     m_drivePID = std::make_unique<frc::PIDController>(
         constants::drive::drivePID::p,
         constants::drive::drivePID::i,
@@ -164,12 +160,14 @@ frc::SwerveModuleState SwerveModule::GetState() const
 
 void SwerveModule::SetTurnMotorInverted(bool inverted)
 {
-    m_turnMotor->SetInverted(inverted);
+    m_turnMotorConfig.Inverted(inverted);
+    m_turnMotor->Configure(m_turnMotorConfig, ResetMode::kNoResetSafeParameters, PersistMode::kNoPersistParameters);
 }
 
 void SwerveModule::SetDriveMotorInverted(bool inverted)
 {
-    m_driveMotor->SetInverted(inverted);
+    m_driveMotorConfig.Inverted(inverted);
+    m_driveMotor->Configure(m_driveMotorConfig, ResetMode::kNoResetSafeParameters, PersistMode::kNoPersistParameters);
 }
 
 void SwerveModule::SetControlMode(ControlMode controlMode)
