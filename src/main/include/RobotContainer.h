@@ -5,13 +5,26 @@
 #pragma once
 
 #include <frc2/command/CommandPtr.h>
+#include <frc/XboxController.h>
 
-class RobotContainer {
- public:
-  RobotContainer();
+#include "subsystems/DriveBase.h"
+#include "subsystems/Elevator.h"
+#include "subsystems/Arm.h"
 
-  frc2::CommandPtr GetAutonomousCommand();
+class RobotContainer 
+{
+  public:
+    RobotContainer();
 
- private:
-  void ConfigureBindings();
+    frc2::CommandPtr GetAutonomousCommand();
+
+  private:
+    void ConfigureBindings();
+    void ConfigureDriveControls();
+
+    frc::XboxController m_driveController {0};
+
+    DriveBase m_driveBase {};
+    Elevator m_elevator {};
+    Arm m_arm {};
 };

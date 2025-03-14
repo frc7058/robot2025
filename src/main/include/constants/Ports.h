@@ -6,18 +6,18 @@ namespace ports
     {
         namespace driveMotorCAN 
         {
-            constexpr int frontLeft = 6;
-            constexpr int frontRight = 3;
-            constexpr int backLeft = 7;
-            constexpr int backRight = 5;
+            constexpr int frontLeft = 6; 
+            constexpr int frontRight = 3; 
+            constexpr int backLeft = 7; 
+            constexpr int backRight = 5; 
         }
 
         namespace turnMotorCAN 
         {
-            constexpr int frontLeft = 9;
-            constexpr int frontRight = 2;
-            constexpr int backLeft = 8;
-            constexpr int backRight = 4;
+            constexpr int frontLeft = 9; 
+            constexpr int frontRight = 2; 
+            constexpr int backLeft = 8; 
+            constexpr int backRight = 4; 
         }
 
         namespace CANCoder 
@@ -31,7 +31,18 @@ namespace ports
 
     namespace intake 
     {
-        constexpr int intakeMotorCAN = 14;
+        constexpr int intakeMotorCAN = 16;
+    }
+
+    namespace elevator 
+    {
+        constexpr int leftMotorCAN = 18;
+        constexpr int rightMotorCAN = 17;
+    }
+
+    namespace arm 
+    {
+        constexpr int motorCAN = 15;
     }
 
     namespace dio 

@@ -27,17 +27,15 @@ public:
     void SetTargetStage(ElevatorStage stage);
 
     // Hide these eventually
-    void SetVoltage(units::volt_t);
+    void SetVoltage(units::volt_t voltage);
     void ZeroMotors();
 
 private:
-    // Elevator driven by two motors
-    // One will most likely need to be inverted as they should drive in opposite directions
-    std::unique_ptr<rev::spark::SparkMax> m_motor1;
-    std::unique_ptr<rev::spark::SparkMax> m_motor2;   
+    std::unique_ptr<rev::spark::SparkMax> m_leftMotor;
+    std::unique_ptr<rev::spark::SparkMax> m_rightMotor;   
 
-    std::unique_ptr<rev::spark::SparkRelativeEncoder> m_encoder1;
-    std::unique_ptr<rev::spark::SparkRelativeEncoder> m_encoder2;
+    std::unique_ptr<rev::spark::SparkRelativeEncoder> m_rightEncoder;
+    std::unique_ptr<rev::spark::SparkRelativeEncoder> m_leftEncoder;
 
     std::unique_ptr<frc::ElevatorFeedforward> m_feedforward;
     std::unique_ptr<frc::ProfiledPIDController<units::meters>> m_pid;

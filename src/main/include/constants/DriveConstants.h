@@ -26,9 +26,9 @@ namespace constants
         constexpr units::meter_t wheelCircumference = wheelDiameter * std::numbers::pi;
 
         // Swerve module locations from robot center
-        constexpr units::meter_t moduleDistanceX = 0.27305_m; 
-        constexpr units::meter_t moduleDistanceY = 0.27305_m; 
-        constexpr units::meter_t radiusToModules = 0.38615_m; 
+        constexpr units::meter_t moduleDistanceX = 0.29845_m; 
+        constexpr units::meter_t moduleDistanceY = 0.29845_m; 
+        // constexpr units::meter_t radiusToModules = 0.38615_m; 
         
         constexpr double rampRateSeconds = 0.1;
 

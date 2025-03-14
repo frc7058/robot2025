@@ -16,13 +16,14 @@ SwerveModule::SwerveModule(std::string name, int driveMotorCanID, int turnMotorC
 
     // Drive motor
     m_driveMotor = std::make_unique<rev::spark::SparkMax>(driveMotorCanID, rev::spark::SparkMax::MotorType::kBrushless);
+    m_driveEncoder = std::make_unique<rev::spark::SparkRelativeEncoder>(m_driveMotor->GetEncoder());
 
     units::meter_t positionConversionFactor = constants::drive::wheelCircumference / (constants::drive::driveGearRatio) * constants::drive::driveMeasurementFudgeFactor;
     units::meter_t velocityConversionFactor = positionConversionFactor / 60.0;
 
     m_driveMotorConfig.SetIdleMode(rev::spark::SparkBaseConfig::IdleMode::kBrake);
-    m_driveMotorConfig.encoder.CountsPerRevolution(constants::encoderCountsPerRev)
-        .UvwAverageDepth(constants::drive::driveEncoderDepth)
+    // m_driveMotorConfig.encoder.CountsPerRevolution(constants::encoderCountsPerRev);
+    m_driveMotorConfig.encoder.UvwAverageDepth(constants::drive::driveEncoderDepth)
         .UvwMeasurementPeriod(constants::drive::driveEncoderPeriod)
         .PositionConversionFactor(positionConversionFactor.value())
         .VelocityConversionFactor(velocityConversionFactor.value());
@@ -35,7 +36,7 @@ SwerveModule::SwerveModule(std::string name, int driveMotorCanID, int turnMotorC
 
     m_turnMotorConfig.SetIdleMode(rev::spark::SparkBaseConfig::IdleMode::kBrake).Inverted(true);
 
-m_turnMotor->Configure(m_turnMotorConfig, ResetMode::kResetSafeParameters, PersistMode::kPersistParameters);
+    m_turnMotor->Configure(m_turnMotorConfig, ResetMode::kResetSafeParameters, PersistMode::kPersistParameters);
     m_drivePID = std::make_unique<frc::PIDController>(
         constants::drive::drivePID::p,
         constants::drive::drivePID::i,
@@ -63,6 +64,14 @@ m_turnMotor->Configure(m_turnMotorConfig, ResetMode::kResetSafeParameters, Persi
     // Check if the motors or encoders have detected faults
     bool faults_detected = ((m_driveMotor->GetStickyFaults() , m_turnMotor->GetStickyFaults() , m_turnEncoder->GetStickyFaultField().GetValue()) == 0); //// , used to be |
     bool okay = m_driveMotor && m_turnMotor && m_turnEncoder && m_driveEncoder && m_drivePID && m_turnPID && m_driveFeedForward;
+
+    if(!m_driveMotor) fmt::print("Drive motor not initialized\n");
+    if(!m_turnMotor) fmt::print("Turn motor not initialized\n");
+    if(!m_turnEncoder) fmt::print("Turn encoder not initialized\n");
+    if(!m_driveEncoder) fmt::print("Drive encoder not initialized\n");
+    if(!m_drivePID) fmt::print("Drive PID not initialized\n");
+    if(!m_turnPID) fmt::print("Turn PID not initialized\n");
+    if(!m_driveFeedForward) fmt::print("Drive feedforward not initialized\n");
 
     if(okay)
     {

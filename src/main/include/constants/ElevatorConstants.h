@@ -4,9 +4,14 @@
 #include <units/length.h>
 #include <units/velocity.h>
 #include <units/acceleration.h>
+#include <numbers>
 
 namespace constants {
     namespace elevator {
+        constexpr units::meter_t sprocketDiameter = 0.0508_m; // 2 inches
+        constexpr units::meter_t sprocketCircumference = sprocketDiameter * std::numbers::pi;
+        constexpr double gearRatio = 12.0;
+
         namespace feedforward {
             constexpr units::volt_t staticFriction = 0.0_V;
             constexpr units::volt_t gravity = 0.0_V;
