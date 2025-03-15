@@ -1,12 +1,9 @@
-#include <rev/config/SparkMaxConfig.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 
 #include "subsystems/Elevator.h"
 #include "constants/ElevatorConstants.h"
 #include "constants/Ports.h"
-
-using ResetMode = rev::spark::SparkBase::ResetMode;
-using PersistMode = rev::spark::SparkBase::PersistMode;
+#include "lib/MotorConfig.h"
 
 Elevator::Elevator() 
 {

@@ -6,9 +6,6 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <pathplanner/lib/commands/PathPlannerAuto.h>
 
-using ResetMode = rev::spark::SparkBase::ResetMode;
-using PersistMode = rev::spark::SparkBase::PersistMode;
-
 SwerveModule::SwerveModule(std::string name, int driveMotorCanID, int turnMotorCanID, int canCoderCanID, units::radian_t canCoderOffset)
     : m_name(name), m_encoderOffset(canCoderOffset)
 {

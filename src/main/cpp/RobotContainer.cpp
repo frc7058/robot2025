@@ -10,23 +10,34 @@
 #include "commands/DriveCommand.h"
 
 RobotContainer::RobotContainer() {
-    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kLeftBumper)
-        .OnTrue(frc2::cmd::RunOnce([this] { m_elevator.SetVoltage(2.0_V); }, {}))
-        .OnFalse(frc2::cmd::RunOnce([this] { m_elevator.ZeroMotors(); }, {} ));
+    // frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kLeftBumper)
+    //     .OnTrue(frc2::cmd::RunOnce([this] { m_elevator.SetVoltage(2.0_V); }, {}))
+    //     .OnFalse(frc2::cmd::RunOnce([this] { m_elevator.ZeroMotors(); }, {} ));
 
-    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kRightBumper)
-        .OnTrue(frc2::cmd::RunOnce([this] { m_elevator.SetVoltage(-2.0_V); }, {}))
-        .OnFalse(frc2::cmd::RunOnce([this] { m_elevator.ZeroMotors(); }, {} ));
+    // frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kRightBumper)
+    //     .OnTrue(frc2::cmd::RunOnce([this] { m_elevator.SetVoltage(-2.0_V); }, {}))
+    //     .OnFalse(frc2::cmd::RunOnce([this] { m_elevator.ZeroMotors(); }, {} ));
 
-    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kA)
-      .OnTrue(frc2::cmd::RunOnce([this] { m_arm.SetVoltage(2.0_V); }, {}))
-      .OnFalse(frc2::cmd::RunOnce([this] { m_arm.ZeroMotors(); }, {}));
+    // frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kA)
+    //   .OnTrue(frc2::cmd::RunOnce([this] { m_arm.SetVoltage(2.0_V); }, {}))
+    //   .OnFalse(frc2::cmd::RunOnce([this] { m_arm.ZeroMotors(); }, {}));
 
-    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kB)
-      .OnTrue(frc2::cmd::RunOnce([this] { m_arm.SetVoltage(-2.0_V); }, {}))
-      .OnFalse(frc2::cmd::RunOnce([this] { m_arm.ZeroMotors(); }, {}));
+    // frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kB)
+    //   .OnTrue(frc2::cmd::RunOnce([this] { m_arm.SetVoltage(-2.0_V); }, {}))
+    //   .OnFalse(frc2::cmd::RunOnce([this] { m_arm.ZeroMotors(); }, {}));
 
     // ConfigureBindings();
+
+    m_sysIdRoutine = m_arm.GetSysIdRoutine();
+
+    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kA)
+        .WhileTrue(m_sysIdRoutine->Quasistatic(frc2::sysid::Direction::kForward));
+    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kB)
+        .WhileTrue(m_sysIdRoutine->Quasistatic(frc2::sysid::Direction::kReverse));
+    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kX)
+        .WhileTrue(m_sysIdRoutine->Dynamic(frc2::sysid::Direction::kForward));
+    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kY)
+        .WhileTrue(m_sysIdRoutine->Dynamic(frc2::sysid::Direction::kReverse));
 }
 
 void RobotContainer::ConfigureBindings() {

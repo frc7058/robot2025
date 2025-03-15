@@ -6,20 +6,24 @@
 #include <units/acceleration.h>
 #include <numbers>
 
-namespace constants {
-    namespace elevator {
+namespace constants 
+{
+    namespace elevator 
+    {
         constexpr units::meter_t sprocketDiameter = 0.0508_m; // 2 inches
         constexpr units::meter_t sprocketCircumference = sprocketDiameter * std::numbers::pi;
         constexpr double gearRatio = 12.0;
 
-        namespace feedforward {
+        namespace feedforward 
+        {
             constexpr units::volt_t staticFriction = 0.0_V;
             constexpr units::volt_t gravity = 0.0_V;
             constexpr auto velocity = 0.0_V * 1.0_s / 1.0_m;
             constexpr auto acceleration = 0.0_V * 1.0_s * 1.0_s / 1.0_m;
         }
 
-        namespace pid {
+        namespace pid 
+        {
             constexpr double p = 0.0;
             constexpr double i = 0.0;
             constexpr double d = 0.0;

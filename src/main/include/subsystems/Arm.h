@@ -16,16 +16,23 @@ public:
 
     void Periodic() override;
 
-    // Hide these eventually
-    void SetVoltage(units::volt_t voltage);
-    void ZeroMotors();
+    void SetTargetAngle(units::radian_t angle);
+
+    units::radian_t GetAngle() const;
+    units::radians_per_second_t GetVelocity() const;
+
+    std::unique_ptr<frc2::sysid::SysIdRoutine> GetSysIdRoutine();
 
 private:
-    std::unique_ptr<rev::spark::SparkMax> m_motor;
-    std::unique_ptr<rev::spark::SparkRelativeEncoder> m_encoder;
+    void SetVoltage(units::volt_t voltage);
+    void Zero();
+
+private:
+    std::unique_ptr<rev::spark::SparkMax> m_armMotor;
+    std::unique_ptr<rev::spark::SparkRelativeEncoder> m_armEncoder;
 
     std::unique_ptr<frc::ArmFeedforward> m_feedforward;
-    std::unique_ptr<frc::ProfiledPIDController<units::meters>> m_pid;
+    std::unique_ptr<frc::ProfiledPIDController<units::radians>> m_pid;
 
     std::unique_ptr<frc::DigitalInput> m_limitSwitch;
 };

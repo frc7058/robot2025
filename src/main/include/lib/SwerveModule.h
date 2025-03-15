@@ -8,10 +8,10 @@
 #include <ctre/phoenix6/CANcoder.hpp>
 #include <rev/SparkMax.h>
 #include <rev/SparkRelativeEncoder.h>
-#include <rev/config/SparkMaxConfig.h>
 #include <units/velocity.h>
 #include <memory>
 #include <string>
+#include "MotorConfig.h"
 
 enum class ControlMode
 {

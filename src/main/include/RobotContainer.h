@@ -5,6 +5,7 @@
 #pragma once
 
 #include <frc2/command/CommandPtr.h>
+#include <frc2/command/sysid/SysIdRoutine.h>
 #include <frc/XboxController.h>
 
 #include "subsystems/DriveBase.h"
@@ -27,4 +28,6 @@ class RobotContainer
     DriveBase m_driveBase {};
     Elevator m_elevator {};
     Arm m_arm {};
+
+    std::unique_ptr<frc2::sysid::SysIdRoutine> m_sysIdRoutine;
 };

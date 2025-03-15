@@ -47,7 +47,9 @@ namespace ports
 
     namespace dio 
     {
-        ////
+        constexpr int photoElectricSensor = 0;
+        constexpr int elevatorLimitSwitch = 1;
+        constexpr int armLimitSwitch = 2;
     }
 
     namespace pwm 
