@@ -26,18 +26,29 @@ RobotContainer::RobotContainer() {
     //   .OnTrue(frc2::cmd::RunOnce([this] { m_arm.SetVoltage(-2.0_V); }, {}))
     //   .OnFalse(frc2::cmd::RunOnce([this] { m_arm.ZeroMotors(); }, {}));
 
+    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kA)
+      .OnTrue(frc2::cmd::RunOnce([this] { m_arm.SetTargetAngle(0.0_deg); }, {}));
+    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kB)
+      .OnTrue(frc2::cmd::RunOnce([this] { m_arm.SetTargetAngle(45.0_deg); }, {}));
+    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kY)
+      .OnTrue(frc2::cmd::RunOnce([this] { m_arm.SetTargetAngle(90.0_deg); }, {}));
+
     // ConfigureBindings();
 
-    m_sysIdRoutine = m_arm.GetSysIdRoutine();
+    // m_sysIdRoutine = m_arm.GetSysIdRoutine();
 
-    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kA)
-        .WhileTrue(m_sysIdRoutine->Quasistatic(frc2::sysid::Direction::kForward));
-    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kB)
-        .WhileTrue(m_sysIdRoutine->Quasistatic(frc2::sysid::Direction::kReverse));
-    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kX)
-        .WhileTrue(m_sysIdRoutine->Dynamic(frc2::sysid::Direction::kForward));
-    frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kY)
-        .WhileTrue(m_sysIdRoutine->Dynamic(frc2::sysid::Direction::kReverse));
+    // frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kA)
+    //     .WhileTrue(m_sysIdRoutine->Quasistatic(frc2::sysid::Direction::kForward))
+    //     .OnFalse(frc2::cmd::RunOnce([this] { m_arm.Zero(); }, {})); 
+    // frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kB)
+    //     .WhileTrue(m_sysIdRoutine->Quasistatic(frc2::sysid::Direction::kReverse))
+    //     .OnFalse(frc2::cmd::RunOnce([this] { m_arm.Zero(); }, {})); 
+    // frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kX)
+    //     .WhileTrue(m_sysIdRoutine->Dynamic(frc2::sysid::Direction::kForward))
+    //     .OnFalse(frc2::cmd::RunOnce([this] { m_arm.Zero(); }, {})); 
+    // frc2::JoystickButton(&m_driveController, frc::XboxController::Button::kY)
+    //     .WhileTrue(m_sysIdRoutine->Dynamic(frc2::sysid::Direction::kReverse))
+    //     .OnFalse(frc2::cmd::RunOnce([this] { m_arm.Zero(); }, {})); 
 }
 
 void RobotContainer::ConfigureBindings() {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <frc2/command/SubsystemBase.h>
+#include <frc2/command/sysid/SysIdRoutine.h>
 #include <frc/controller/ProfiledPIDController.h>
 #include <frc/controller/ArmFeedforward.h>
 #include <frc/DigitalInput.h>
@@ -23,7 +24,7 @@ public:
 
     std::unique_ptr<frc2::sysid::SysIdRoutine> GetSysIdRoutine();
 
-private:
+public:
     void SetVoltage(units::volt_t voltage);
     void Zero();
 

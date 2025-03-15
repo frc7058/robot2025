@@ -8,9 +8,6 @@
 #include "constants/Ports.h"
 #include "lib/MotorConfig.h"
 
-using ResetMode = rev::spark::SparkBase::ResetMode;
-using PersistMode = rev::spark::SparkBase::PersistMode;
-
 Arm::Arm()
 {
     m_armMotor = std::make_unique<rev::spark::SparkMax>(ports::arm::motorCAN, rev::spark::SparkMax::MotorType::kBrushless);
@@ -20,6 +17,7 @@ Arm::Arm()
     units::radian_t velocityConversionFactor = positionConversionFactor / 60.0;
 
     rev::spark::SparkMaxConfig motorConfig;
+    motorConfig.Inverted(true);
     motorConfig.SetIdleMode(rev::spark::SparkMaxConfig::IdleMode::kBrake);
     motorConfig.encoder.PositionConversionFactor(positionConversionFactor.value())
         .VelocityConversionFactor(velocityConversionFactor.value());
@@ -40,6 +38,8 @@ Arm::Arm()
             constants::arm::pid::maxVelocity,
             constants::arm::pid::maxAcceleration
         ));
+
+    m_pid->SetTolerance(constants::arm::angleTolerance);
 }
 
 void Arm::Periodic() 
@@ -57,10 +57,24 @@ void Arm::Periodic()
     // Clamp output voltage
     output = std::clamp(output, -constants::arm::maxVoltage, constants::arm::maxVoltage);
 
-    // Set output voltage
-    // SetVoltage(output);
+    if(m_pid->AtGoal())
+    {
+        fmt::print("At goal\n");
+        output = 0.0_V;
+    }
 
-    frc::SmartDashboard::PutNumber("Arm angle", (units::degree_t { m_armEncoder->GetPosition() }).value());
+    // Set output voltage
+    SetVoltage(output);
+
+    fmt::print("Error: {}\n", (units::degree_t { m_pid->GetPositionError() }).value());
+    fmt::print("Arm angle: {}, Arm commanded angle: {}, Arm output voltage: {}, Arm velocity: {}, Arm commanded velocity: {}\n",
+        (units::degree_t { GetAngle() }).value(),
+        (units::degree_t { m_pid->GetGoal().position }).value(),
+        output.value(),
+        (units::degrees_per_second_t { m_armEncoder->GetVelocity() }).value(),
+        (units::degrees_per_second_t { m_pid->GetGoal().velocity }).value());
+
+    frc::SmartDashboard::PutNumber("Arm angle", (units::degree_t { GetAngle() }).value());
     frc::SmartDashboard::PutNumber("Arm commanded angle", (units::degree_t { m_pid->GetGoal().position }).value());
     frc::SmartDashboard::PutNumber("Arm output voltage", output.value());
 }
@@ -95,7 +109,7 @@ void Arm::Zero()
 std::unique_ptr<frc2::sysid::SysIdRoutine> Arm::GetSysIdRoutine()
 {
     auto routine = std::make_unique<frc2::sysid::SysIdRoutine>(
-        frc2::sysid::Config(0.1_V / 1.0_s, 0.5_V, 5.0_s, nullptr),
+        frc2::sysid::Config(0.25_V / 1.0_s, 0.75_V, 7.0_s, nullptr),
         frc2::sysid::Mechanism (
             [this] (units::volt_t voltage) { SetVoltage(voltage); },
             [this] (frc::sysid::SysIdRoutineLog* log) {
@@ -109,8 +123,6 @@ std::unique_ptr<frc2::sysid::SysIdRoutine> Arm::GetSysIdRoutine()
             this
         )
     );
-
-    units::second_t timeout = 2.0_s;
 
     return std::move(routine);
 }

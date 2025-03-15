@@ -12,7 +12,7 @@ class Intake : public frc2::SubsystemBase
 public:
     Intake();
 
-    void Periodic() override;
+    // void Periodic() override;
 
     void SetVoltage(units::volt_t voltage);
     void Zero();
