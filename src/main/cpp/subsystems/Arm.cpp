@@ -59,20 +59,20 @@ void Arm::Periodic()
 
     if(m_pid->AtGoal())
     {
-        fmt::print("At goal\n");
+        // fmt::print("At goal\n");
         output = 0.0_V;
     }
 
     // Set output voltage
     SetVoltage(output);
 
-    fmt::print("Error: {}\n", (units::degree_t { m_pid->GetPositionError() }).value());
-    fmt::print("Arm angle: {}, Arm commanded angle: {}, Arm output voltage: {}, Arm velocity: {}, Arm commanded velocity: {}\n",
-        (units::degree_t { GetAngle() }).value(),
-        (units::degree_t { m_pid->GetGoal().position }).value(),
-        output.value(),
-        (units::degrees_per_second_t { m_armEncoder->GetVelocity() }).value(),
-        (units::degrees_per_second_t { m_pid->GetGoal().velocity }).value());
+    // fmt::print("Error: {}\n", (units::degree_t { m_pid->GetPositionError() }).value());
+    // fmt::print("Arm angle: {}, Arm commanded angle: {}, Arm output voltage: {}, Arm velocity: {}, Arm commanded velocity: {}\n",
+    //     (units::degree_t { GetAngle() }).value(),
+    //     (units::degree_t { m_pid->GetGoal().position }).value(),
+    //     output.value(),
+    //     (units::degrees_per_second_t { m_armEncoder->GetVelocity() }).value(),
+    //     (units::degrees_per_second_t { m_pid->GetGoal().velocity }).value());
 
     frc::SmartDashboard::PutNumber("Arm angle", (units::degree_t { GetAngle() }).value());
     frc::SmartDashboard::PutNumber("Arm commanded angle", (units::degree_t { m_pid->GetGoal().position }).value());
@@ -124,5 +124,5 @@ std::unique_ptr<frc2::sysid::SysIdRoutine> Arm::GetSysIdRoutine()
         )
     );
 
-    return std::move(routine);
+    return routine;
 }

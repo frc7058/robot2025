@@ -1,4 +1,5 @@
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/RobotController.h>
 
 #include "subsystems/Elevator.h"
 #include "constants/ElevatorConstants.h"
@@ -44,12 +45,57 @@ Elevator::Elevator()
             constants::elevator::pid::maxVelocity,
             constants::elevator::pid::maxAcceleration
         ));
+
+    m_pid->SetTolerance(constants::elevator::positionTolerance);
 }
 
 void Elevator::Periodic() 
 {
+    units::meter_t currentPosition = GetPosition();
+
+    units::meter_t targetPosition = m_pid->GetSetpoint().position;
+    units::meters_per_second_t targetVelocity = m_pid->GetSetpoint().velocity;
+
+    units::volt_t outputFF = m_feedforward->Calculate(targetVelocity);
+    units::volt_t outputPID { m_pid->Calculate(currentPosition) };
+
+    units::volt_t output = outputFF + outputPID;
+    output = std::clamp(output, -constants::elevator::maxVoltage, constants::elevator::maxVoltage);
+
+    if (m_pid->AtGoal())
+    {
+        fmt::print("At goal. ");
+        output = 0.0_V;
+    }
+
+    fmt::print("Elevator position: {}, velocity: {}, target position: {}, target velocity: {}, output voltage: {}",
+        GetPosition().value(),
+        GetVelocity().value(),
+        targetPosition.value(),
+        targetVelocity.value(),
+        output.value());
+
+    // Set output voltage
+    SetVoltage(output);
+
     frc::SmartDashboard::PutNumber("Elevator Left Encoder", m_leftEncoder->GetPosition());
     frc::SmartDashboard::PutNumber("Elevator Right Encoder", m_leftEncoder->GetPosition());
+}
+
+units::meter_t Elevator::GetPosition() const
+{
+    units::meter_t leftPosition { m_leftEncoder->GetPosition() };
+    units::meter_t rightPosition { m_rightEncoder->GetPosition() };
+    units::meter_t averagePosition = (leftPosition + rightPosition) / 2.0;
+    return averagePosition;
+}
+
+units::meters_per_second_t Elevator::GetVelocity() const
+{
+    units::meter_t leftVelocity { m_leftEncoder->GetVelocity() };
+    units::meter_t rightVelocity { m_rightEncoder->GetVelocity() };
+    units::meter_t averageVelocity = (leftVelocity + rightVelocity) / 2.0;
+    return averageVelocity;
 }
 
 void Elevator::SetVoltage(units::volt_t voltage) 
@@ -62,4 +108,30 @@ void Elevator::ZeroMotors()
 {
     m_leftMotor->SetVoltage(0_V);
     m_rightMotor->SetVoltage(0_V);
+}
+
+std::unique_ptr<frc2::sysid::SysIdRoutine> Elevator::GetSysIdRoutine()
+{
+    auto routine = std::make_unique<frc2::sysid::SysIdRoutine>(
+        frc2::sysid::Config(0.25_V / 1.0_s, 0.75_V, 8.0_s, nullptr),
+        frc2::sysid::Mechanism (
+            [this] (units::volt_t voltage) { SetVoltage(voltage); },
+            [this] (frc::sysid::SysIdRoutineLog* log) {
+                units::volt_t batteryVoltage = frc::RobotController::GetBatteryVoltage();
+
+                log->Motor("left-motor")
+                    .voltage(m_leftMotor->Get() * batteryVoltage)
+                    .position(units::meter_t { m_leftEncoder->GetPosition() })
+                    .velocity(units::meters_per_second_t { m_leftEncoder->GetVelocity() });
+
+                log->Motor("right-motor")
+                    .voltage(m_rightMotor->Get() * batteryVoltage)
+                    .position(units::meter_t { m_rightEncoder->GetPosition() })
+                    .velocity(units::meters_per_second_t { m_rightEncoder->GetVelocity() });
+            },
+            this
+        )
+    );
+
+    return routine;
 }

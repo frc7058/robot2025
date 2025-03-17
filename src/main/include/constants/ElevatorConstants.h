@@ -10,9 +10,13 @@ namespace constants
 {
     namespace elevator 
     {
+        units::volt_t maxVoltage = 2.0_V;
+
         constexpr units::meter_t sprocketDiameter = 0.0508_m; // 2 inches
         constexpr units::meter_t sprocketCircumference = sprocketDiameter * std::numbers::pi;
         constexpr double gearRatio = 12.0;
+
+        constexpr units::meter_t positionTolerance = 0.01_m;
 
         namespace feedforward 
         {
