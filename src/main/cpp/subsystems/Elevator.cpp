@@ -25,11 +25,11 @@ Elevator::Elevator()
     m_rightEncoder = std::make_unique<rev::spark::SparkRelativeEncoder>(m_rightMotor->GetEncoder());
 
     rev::spark::SparkMaxConfig rightMotorConfig;
-    rightMotorConfig.SetIdleMode(rev::spark::SparkMaxConfig::IdleMode::kBrake);
+    rightMotorConfig.Inverted(false).SetIdleMode(rev::spark::SparkMaxConfig::IdleMode::kBrake);
     rightMotorConfig.encoder.PositionConversionFactor(positionConversionFactor.value())
         .VelocityConversionFactor(velocityConversionFactor.value());
 
-    m_leftMotor->Configure(leftMotorConfig, ResetMode::kResetSafeParameters, PersistMode::kPersistParameters);
+    m_rightMotor->Configure(rightMotorConfig, ResetMode::kResetSafeParameters, PersistMode::kPersistParameters);
 
     m_feedforward = std::make_unique<frc::ElevatorFeedforward>(
         constants::elevator::feedforward::staticFriction,
@@ -53,17 +53,10 @@ Elevator::Elevator()
 
 void Elevator::Periodic() 
 {
-    units::meter_t currentPosition = GetPosition();
+    // if(AtBottom())
+    //     fmt::print("Elevator at bottom\n");
 
-    units::meter_t targetPosition = m_pid->GetSetpoint().position;
-    units::meters_per_second_t targetVelocity = m_pid->GetSetpoint().velocity;
-
-    units::volt_t outputFF = m_feedforward->Calculate(targetVelocity);
-    units::volt_t outputPID { m_pid->Calculate(currentPosition) };
-
-    units::volt_t output = outputFF + outputPID;
-    output = std::clamp(output, -constants::elevator::maxVoltage, constants::elevator::maxVoltage);
-
+    // fmt::print("Test ");
     if(AtBottom() && m_leftMotor->Get() < 0 && m_rightMotor->Get() < 0)
     {
         fmt::print("Zeroing elevator\n");
@@ -71,14 +64,25 @@ void Elevator::Periodic()
         m_leftEncoder->SetPosition(0);
         m_rightEncoder->SetPosition(0);
     }
-    if (m_pid->AtGoal())
-    {
-        fmt::print("Elevator at goal\n");
-        ZeroMotors();
-    }
     else 
     {
-        fmt::print("Elevator position: {}, velocity: {}, target position: {}, target velocity: {}, output voltage: {}",
+        units::meter_t currentPosition = GetPosition();
+        units::meter_t targetPosition = m_pid->GetSetpoint().position;
+        units::meters_per_second_t targetVelocity = m_pid->GetSetpoint().velocity;
+
+        units::volt_t outputFF = m_feedforward->Calculate(targetVelocity);
+
+        units::volt_t outputPID { m_pid->Calculate(currentPosition) };
+        units::volt_t output = 0.0_V;
+
+        if(m_pid->AtGoal())
+            output = outputFF;
+        else 
+            output = outputFF + outputPID;
+
+        output = std::clamp(output, -constants::elevator::maxVoltage, constants::elevator::maxVoltage);
+        
+        fmt::print("Elevator position: {}, velocity: {}, target position: {}, target velocity: {}, output: {}\n",
                    GetPosition().value(),
                    GetVelocity().value(),
                    targetPosition.value(),
@@ -90,7 +94,17 @@ void Elevator::Periodic()
     }
 
     frc::SmartDashboard::PutNumber("Elevator Left Encoder", m_leftEncoder->GetPosition());
-    frc::SmartDashboard::PutNumber("Elevator Right Encoder", m_leftEncoder->GetPosition());
+    frc::SmartDashboard::PutNumber("Elevator Right Encoder", m_rightEncoder->GetPosition());
+}
+
+void Elevator::SetTargetHeight(units::meter_t height)
+{
+    m_pid->SetGoal(std::clamp(height, constants::elevator::positionMin, constants::elevator::positionMax));
+}
+
+bool Elevator::AtTargetHeight() const
+{
+    return m_pid->AtGoal();
 }
 
 units::meter_t Elevator::GetPosition() const
@@ -103,9 +117,9 @@ units::meter_t Elevator::GetPosition() const
 
 units::meters_per_second_t Elevator::GetVelocity() const
 {
-    units::meter_t leftVelocity { m_leftEncoder->GetVelocity() };
-    units::meter_t rightVelocity { m_rightEncoder->GetVelocity() };
-    units::meter_t averageVelocity = (leftVelocity + rightVelocity) / 2.0;
+    units::meters_per_second_t leftVelocity { m_leftEncoder->GetVelocity() };
+    units::meters_per_second_t rightVelocity { m_rightEncoder->GetVelocity() };
+    units::meters_per_second_t averageVelocity = (leftVelocity + rightVelocity) / 2.0;
     return averageVelocity;
 }
 
@@ -129,7 +143,7 @@ void Elevator::ZeroMotors()
 std::unique_ptr<frc2::sysid::SysIdRoutine> Elevator::GetSysIdRoutine()
 {
     auto routine = std::make_unique<frc2::sysid::SysIdRoutine>(
-        frc2::sysid::Config(0.25_V / 1.0_s, 0.75_V, 8.0_s, nullptr),
+        frc2::sysid::Config(0.5_V / 1.0_s, 1.0_V, 8.0_s, nullptr),
         frc2::sysid::Mechanism (
             [this] (units::volt_t voltage) { SetVoltage(voltage); },
             [this] (frc::sysid::SysIdRoutineLog* log) {

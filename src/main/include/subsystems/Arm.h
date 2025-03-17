@@ -23,6 +23,7 @@ public:
     bool AtReferencePosition() const;
     
     void Reset();
+    void StopResetting();
     void Zero();
 
     units::radian_t GetAngle() const;

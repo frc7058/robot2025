@@ -17,6 +17,9 @@ public:
 
     void Periodic() override;
 
+    void SetTargetHeight(units::meter_t height);
+    bool AtTargetHeight() const;
+
     units::meter_t GetPosition() const;
     units::meters_per_second_t GetVelocity() const;
 

@@ -13,7 +13,7 @@ namespace ArmCommands
             [arm] {},
 
             // OnEnd
-            [arm] (bool interrupted) { arm->Zero(); },
+            [arm] (bool interrupted) { arm->Zero(); arm->StopResetting(); },
 
             // IsFinished
             [arm] { return arm->AtReferencePosition(); },

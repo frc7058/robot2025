@@ -54,29 +54,34 @@ void Arm::Periodic()
     units::volt_t outputFF = m_feedforward->Calculate(targetAngle, targetVelocity);
     units::volt_t outputPID { m_pid->Calculate(currentAngle) };
 
-    units::volt_t output = outputFF + outputPID;
+    units::volt_t output = 0.0_V;
+
+
+    // if(AtReferencePosition())
+    //     fmt::print("Arm at zero\n");
+
+    // if limit switch is hit and arm going backwards, stop
+    // if (AtReferencePosition() && m_armMotor->Get() < 0)
+    // {
+    //     fmt::print("Zeroing arm\n");
+    //     Zero();
+    //     m_resetting = false;
+    //     m_armEncoder->SetPosition(0);
+    // }
+    // else 
+    if(m_pid->AtGoal())
+    {
+        // fmt::print("At goal\n");
+        output = 0.0_V;
+    }
+    else
+    {
+        output = outputFF + outputPID;
+    }
 
     // Clamp output voltage
     output = std::clamp(output, -constants::arm::maxVoltage, constants::arm::maxVoltage);
-
-    // if limit switch is hit and arm going backwards, stop
-    if (AtReferencePosition() && m_armMotor->Get() < 0)
-    {
-        fmt::print("Zeroing arm\n");
-        Zero();
-        m_resetting = false;
-        m_armEncoder->SetPosition(0);
-    }
-    else if(m_pid->AtGoal())
-    {
-        // fmt::print("At goal\n");
-        Zero();
-    }
-    else if(!m_resetting) // when resetting, no PID control
-    {
-        // Set output voltage
-        SetVoltage(output);
-    }
+    SetVoltage(output);
 
     // fmt::print("Error: {}\n", (units::degree_t { m_pid->GetPositionError() }).value());
     // fmt::print("Arm angle: {}, Arm commanded angle: {}, Arm output voltage: {}, Arm velocity: {}, Arm commanded velocity: {}\n",
@@ -111,9 +116,14 @@ void Arm::Reset()
     m_armMotor->SetVoltage(constants::arm::resetVoltage);
 }
 
+void Arm::StopResetting()
+{
+    m_resetting = false;
+}
+
 bool Arm::AtReferencePosition() const 
 {
-    return m_limitSwitch.get();
+    return m_limitSwitch->Get();
 }
 
 units::radian_t Arm::GetAngle() const
@@ -140,7 +150,7 @@ void Arm::Zero()
 std::unique_ptr<frc2::sysid::SysIdRoutine> Arm::GetSysIdRoutine()
 {
     auto routine = std::make_unique<frc2::sysid::SysIdRoutine>(
-        frc2::sysid::Config(0.25_V / 1.0_s, 0.75_V, 7.0_s, nullptr),
+        frc2::sysid::Config(0.25_V / 1.0_s, 0.5_V, 7.0_s, nullptr),
         frc2::sysid::Mechanism (
             [this] (units::volt_t voltage) { SetVoltage(voltage); },
             [this] (frc::sysid::SysIdRoutineLog* log) {
