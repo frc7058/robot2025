@@ -16,6 +16,7 @@ namespace constants
         constexpr units::radian_t angleTolerance = 1.0_deg;
 
         constexpr units::volt_t maxVoltage = 1.5_V;
+        constexpr units::volt_t resetVoltage = -0.75_V;
 
         namespace feedforward 
         {

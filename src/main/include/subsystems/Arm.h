@@ -19,14 +19,18 @@ public:
 
     void SetTargetAngle(units::radian_t angle);
 
+    bool AtReferencePosition() const;
+    
+    void Reset();
+    void Zero();
+
     units::radian_t GetAngle() const;
     units::radians_per_second_t GetVelocity() const;
 
     std::unique_ptr<frc2::sysid::SysIdRoutine> GetSysIdRoutine();
 
-public:
+private:
     void SetVoltage(units::volt_t voltage);
-    void Zero();
 
 private:
     std::unique_ptr<rev::spark::SparkMax> m_armMotor;
