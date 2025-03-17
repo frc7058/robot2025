@@ -40,6 +40,8 @@ Arm::Arm()
         ));
 
     m_pid->SetTolerance(constants::arm::angleTolerance);
+
+    m_limitSwitch = std::make_unique<frc::DigitalInput>(ports::dio::armLimitSwitch);
 }
 
 void Arm::Periodic() 
@@ -57,14 +59,24 @@ void Arm::Periodic()
     // Clamp output voltage
     output = std::clamp(output, -constants::arm::maxVoltage, constants::arm::maxVoltage);
 
-    if(m_pid->AtGoal())
+    // if limit switch is hit and arm going backwards, stop
+    if (AtReferencePosition() && m_armMotor->Get() < 0)
+    {
+        fmt::print("Zeroing arm\n");
+        Zero();
+        m_resetting = false;
+        m_armEncoder->SetPosition(0);
+    }
+    else if(m_pid->AtGoal())
     {
         // fmt::print("At goal\n");
-        output = 0.0_V;
+        Zero();
     }
-
-    // Set output voltage
-    SetVoltage(output);
+    else if(!m_resetting) // when resetting, no PID control
+    {
+        // Set output voltage
+        SetVoltage(output);
+    }
 
     // fmt::print("Error: {}\n", (units::degree_t { m_pid->GetPositionError() }).value());
     // fmt::print("Arm angle: {}, Arm commanded angle: {}, Arm output voltage: {}, Arm velocity: {}, Arm commanded velocity: {}\n",
@@ -83,6 +95,25 @@ void Arm::SetTargetAngle(units::radian_t angle)
 {
     angle = frc::AngleModulus(angle);
     m_pid->SetGoal(std::clamp(angle, constants::arm::minAngle, constants::arm::maxAngle));
+}
+
+bool Arm::AtTargetAngle() const
+{
+    return m_pid->AtGoal();
+}
+
+void Arm::Reset()
+{
+    if(AtReferencePosition())
+        return;
+
+    m_resetting = true;
+    m_armMotor->SetVoltage(constants::arm::resetVoltage);
+}
+
+bool Arm::AtReferencePosition() const 
+{
+    return m_limitSwitch.get();
 }
 
 units::radian_t Arm::GetAngle() const

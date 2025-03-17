@@ -18,6 +18,15 @@ namespace constants
 
         constexpr units::meter_t positionTolerance = 0.01_m;
 
+        namespace stages
+        {
+            constexpr units::meter_t bottomPosition = 0.0_m;
+            constexpr units::meter_t stageOnePosition = 0.0_m;
+            constexpr units::meter_t stageTwoPosition = 0.0_m;
+            constexpr units::meter_t stageThreePosition = 0.0_m;
+            constexpr units::meter_t stageFourPosition = 0.0_m;
+        }
+
         namespace feedforward 
         {
             constexpr units::volt_t staticFriction = 0.0_V;

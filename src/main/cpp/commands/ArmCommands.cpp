@@ -21,4 +21,11 @@ namespace ArmCommands
             {arm}
         ).WithTimeout(5.0_s);
     }
+
+    frc2::CommandPtr SetAngle(Arm* arm, units::radian_t angle)
+    {
+        return frc2::cmd::RunOnce([arm, angle] { arm->SetTargetAngle(angle); })
+            .AndThen(frc2::cmd::WaitUntil([arm] { return arm->AtTargetAngle(); }))
+            .WithTimeout(4.0_s);
+    }
 }

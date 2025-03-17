@@ -10,14 +10,6 @@
 #include <units/length.h>
 #include <memory>
 
-enum class ElevatorStage {
-    Bottom,
-    Stage1,
-    Stage2,
-    Stage3,
-    Stage4
-};
-
 class Elevator : public frc2::SubsystemBase 
 {
 public:
@@ -25,10 +17,10 @@ public:
 
     void Periodic() override;
 
-    void SetTargetStage(ElevatorStage stage);
-
     units::meter_t GetPosition() const;
     units::meters_per_second_t GetVelocity() const;
+
+    bool AtBottom() const;
 
     std::unique_ptr<frc2::sysid::SysIdRoutine> GetSysIdRoutine();
 

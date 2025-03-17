@@ -18,6 +18,7 @@ public:
     void Periodic() override;
 
     void SetTargetAngle(units::radian_t angle);
+    bool AtTargetAngle() const;
 
     bool AtReferencePosition() const;
     
@@ -40,4 +41,5 @@ private:
     std::unique_ptr<frc::ProfiledPIDController<units::radians>> m_pid;
 
     std::unique_ptr<frc::DigitalInput> m_limitSwitch;
+    bool m_resetting = false;
 };

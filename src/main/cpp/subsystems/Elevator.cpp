@@ -47,6 +47,8 @@ Elevator::Elevator()
         ));
 
     m_pid->SetTolerance(constants::elevator::positionTolerance);
+
+    m_limitSwitch = std::make_unique<frc::DigitalInput>(ports::dio::elevatorLimitSwitch);
 }
 
 void Elevator::Periodic() 
@@ -62,21 +64,30 @@ void Elevator::Periodic()
     units::volt_t output = outputFF + outputPID;
     output = std::clamp(output, -constants::elevator::maxVoltage, constants::elevator::maxVoltage);
 
+    if(AtBottom() && m_leftMotor->Get() < 0 && m_rightMotor->Get() < 0)
+    {
+        fmt::print("Zeroing elevator\n");
+        ZeroMotors();
+        m_leftEncoder->SetPosition(0);
+        m_rightEncoder->SetPosition(0);
+    }
     if (m_pid->AtGoal())
     {
-        fmt::print("At goal. ");
-        output = 0.0_V;
+        fmt::print("Elevator at goal\n");
+        ZeroMotors();
     }
+    else 
+    {
+        fmt::print("Elevator position: {}, velocity: {}, target position: {}, target velocity: {}, output voltage: {}",
+                   GetPosition().value(),
+                   GetVelocity().value(),
+                   targetPosition.value(),
+                   targetVelocity.value(),
+                   output.value());
 
-    fmt::print("Elevator position: {}, velocity: {}, target position: {}, target velocity: {}, output voltage: {}",
-        GetPosition().value(),
-        GetVelocity().value(),
-        targetPosition.value(),
-        targetVelocity.value(),
-        output.value());
-
-    // Set output voltage
-    SetVoltage(output);
+        // Set output voltage
+        SetVoltage(output);
+    }
 
     frc::SmartDashboard::PutNumber("Elevator Left Encoder", m_leftEncoder->GetPosition());
     frc::SmartDashboard::PutNumber("Elevator Right Encoder", m_leftEncoder->GetPosition());
@@ -96,6 +107,11 @@ units::meters_per_second_t Elevator::GetVelocity() const
     units::meter_t rightVelocity { m_rightEncoder->GetVelocity() };
     units::meter_t averageVelocity = (leftVelocity + rightVelocity) / 2.0;
     return averageVelocity;
+}
+
+bool Elevator::AtBottom() const 
+{
+    return m_limitSwitch->Get();
 }
 
 void Elevator::SetVoltage(units::volt_t voltage) 
