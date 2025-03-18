@@ -1,24 +1,43 @@
 #include "commands/ElevatorCommands.h"
-#include "subsystems/Elevator.h"
+#include "commands/ArmCommands.h"
+#include "constants/ElevatorConstants.h"
+#include "constants/ArmConstants.h"
 
 namespace ElevatorCommands
 {
-    frc2::CommandPtr SetHeight(Elevator* elevator, units::meter_t height)
+    static units::radian_t GetArmAngle(units::meter_t height)
     {
-        return frc2::FunctionalCommand(
-            // Initialize
-            [elevator, height] { elevator->SetTargetHeight(height); },
+        // Elevator is below the "in" position: move outward
+        if (height < constants::elevator::stages::armInPosition)
+            return constants::arm::outAngle;
+        else // Elevator is above the "in" position: move inward
+            return constants::arm::moveInAngle;
+    }
 
-            // Periodic
-            [elevator] {},
+    frc2::CommandPtr SetHeight(Elevator* elevator, Arm* arm, units::meter_t height)
+    {
+        units::radian_t startAngle = GetArmAngle(elevator->GetPosition());
 
-            // OnEnd
-            [elevator] (bool interrupted) {},
+        return ArmCommands::SetAngle(arm, startAngle)
+            .AndThen(frc2::FunctionalCommand(
+                // Initialize
+                [elevator, height] { elevator->SetTargetHeight(height); },
 
-            // IsFinished
-            [elevator] { return elevator->AtTargetHeight(); },
+                // Periodic
+                [elevator, arm] {
+                    units::meter_t height = elevator->GetPosition();
+                    units::radian_t targetAngle = GetArmAngle(height);
 
-            {elevator}   
-        ).WithTimeout(4.0_s);
+                    arm->SetTargetAngle(targetAngle);
+                },
+
+                // OnEnd
+                [elevator] (bool interrupted) {},
+
+                // IsFinished
+                [elevator] { return elevator->AtTargetHeight(); },
+
+                {elevator, arm}   
+            ).WithTimeout(4.0_s));
     }
 }

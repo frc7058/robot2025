@@ -27,6 +27,8 @@ namespace constants
             constexpr units::meter_t stageOnePosition = 0.135_m;
             constexpr units::meter_t stageTwoPosition = 0.35_m;
             constexpr units::meter_t stageThreePosition = 0.67_m;
+
+            constexpr units::meter_t armInPosition = 0.5_m;
         }
 
         namespace feedforward 
@@ -44,7 +46,7 @@ namespace constants
             constexpr double d = 0.0;
 
             constexpr units::meters_per_second_t maxVelocity = 3.0_mps;
-            constexpr units::meters_per_second_squared_t maxAcceleration = 6.0_mps_sq;
+            constexpr units::meters_per_second_squared_t maxAcceleration = 4.5_mps_sq;
         }
     }
 }

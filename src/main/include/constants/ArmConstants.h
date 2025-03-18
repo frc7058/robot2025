@@ -18,6 +18,10 @@ namespace constants
         constexpr units::volt_t maxVoltage = 3.0_V;
         constexpr units::volt_t resetVoltage = -2.0_V;
 
+        constexpr units::radian_t outAngle = 60.0_deg;
+        constexpr units::radian_t moveInAngle = 40.0_deg;
+        constexpr units::radian_t inAngle = 0.0_deg;
+
         namespace feedforward 
         {
             constexpr units::volt_t staticFriction = 0.12011_V;
