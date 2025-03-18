@@ -15,11 +15,11 @@ namespace constants
         constexpr units::radian_t maxAngle = 135.0_deg;
         constexpr units::radian_t angleTolerance = 1.0_deg;
 
-        constexpr units::volt_t maxVoltage = 3.0_V;
+        constexpr units::volt_t maxVoltage = 4.0_V;
         constexpr units::volt_t resetVoltage = -2.0_V;
 
         constexpr units::radian_t outAngle = 60.0_deg;
-        constexpr units::radian_t moveInAngle = 40.0_deg;
+        constexpr units::radian_t moveInAngle = 30.0_deg;
         constexpr units::radian_t inAngle = 0.0_deg;
 
         namespace feedforward 

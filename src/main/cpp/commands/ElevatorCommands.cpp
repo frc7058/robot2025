@@ -17,6 +17,7 @@ namespace ElevatorCommands
     frc2::CommandPtr SetHeight(Elevator* elevator, Arm* arm, units::meter_t height)
     {
         units::radian_t startAngle = GetArmAngle(elevator->GetPosition());
+        fmt::print("Height: {}, start angle: {}\n", elevator->GetPosition().value(), (units::degree_t {startAngle}).value());
 
         return ArmCommands::SetAngle(arm, startAngle)
             .AndThen(frc2::FunctionalCommand(
@@ -27,6 +28,7 @@ namespace ElevatorCommands
                 [elevator, arm] {
                     units::meter_t height = elevator->GetPosition();
                     units::radian_t targetAngle = GetArmAngle(height);
+                    fmt::print("Height: {}, target angle: {}, angle: {}\n", elevator->GetPosition().value(), (units::degree_t{targetAngle}).value(), (units::degree_t {arm->GetAngle()}).value());
 
                     arm->SetTargetAngle(targetAngle);
                 },

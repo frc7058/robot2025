@@ -11,17 +11,17 @@ namespace constants
     namespace drive 
     {
         // Motor voltage limits
-        constexpr units::volt_t maxDriveVoltage = 12.0_V;
-        constexpr units::volt_t maxTurnVoltage = 10.0_V;
+        constexpr units::volt_t maxDriveVoltage = 10.0_V; // og 12v
+        constexpr units::volt_t maxTurnVoltage = 8.0_V; // og 10v
         
         // Maximum drive velocities
-        constexpr units::meters_per_second_t maxDriveVelocity = 4.5_mps;
-        constexpr units::radians_per_second_t maxAngularVelocity {2.25 * std::numbers::pi};
+        constexpr units::meters_per_second_t maxDriveVelocity = 4.5_mps; // og 4.5
+        constexpr units::radians_per_second_t maxAngularVelocity {2.25 * std::numbers::pi}; // used to be 2.25
 
         constexpr units::meters_per_second_t slowMaxDriveVelocity = 1.5_mps;
         constexpr units::radians_per_second_t slowMaxAngularVelocity {1.0 * std::numbers::pi};
 
-        // Swerve wheels inforrmation
+        // Swerve wheels inforxrmation
         constexpr units::meter_t wheelDiameter = 0.1016_m;
         constexpr units::meter_t wheelCircumference = wheelDiameter * std::numbers::pi;
 

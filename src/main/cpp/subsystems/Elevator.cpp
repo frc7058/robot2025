@@ -82,12 +82,12 @@ void Elevator::Periodic()
 
         output = std::clamp(output, -constants::elevator::maxVoltage, constants::elevator::maxVoltage);
         
-        fmt::print("Elevator position: {}, velocity: {}, target position: {}, target velocity: {}, output: {}\n",
-                   GetPosition().value(),
-                   GetVelocity().value(),
-                   targetPosition.value(),
-                   targetVelocity.value(),
-                   output.value());
+        // fmt::print("Elevator position: {}, velocity: {}, target position: {}, target velocity: {}, output: {}\n",
+        //            GetPosition().value(),
+        //            GetVelocity().value(),
+        //            targetPosition.value(),
+        //            targetVelocity.value(),
+        //            output.value());
 
         // Set output voltage
         SetVoltage(output);

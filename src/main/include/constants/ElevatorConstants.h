@@ -10,7 +10,8 @@ namespace constants
 {
     namespace elevator 
     {
-        constexpr units::volt_t maxVoltage = 6.0_V;
+        constexpr units::volt_t maxVoltage = 4.0_V;
+        // constexpr units::volt_t maxVoltage = 6.0_V;
 
         constexpr units::meter_t sprocketDiameter = 0.0508_m; // 2 inches
         constexpr units::meter_t sprocketCircumference = sprocketDiameter * std::numbers::pi;
@@ -28,7 +29,7 @@ namespace constants
             constexpr units::meter_t stageTwoPosition = 0.35_m;
             constexpr units::meter_t stageThreePosition = 0.67_m;
 
-            constexpr units::meter_t armInPosition = 0.5_m;
+            constexpr units::meter_t armInPosition = 0.45_m;
         }
 
         namespace feedforward 
@@ -45,8 +46,10 @@ namespace constants
             constexpr double i = 6.0;
             constexpr double d = 0.0;
 
-            constexpr units::meters_per_second_t maxVelocity = 3.0_mps;
-            constexpr units::meters_per_second_squared_t maxAcceleration = 4.5_mps_sq;
+            // constexpr units::meters_per_second_t maxVelocity = 3.0_mps;
+            // constexpr units::meters_per_second_squared_t maxAcceleration = 4.5_mps_sq;
+            constexpr units::meters_per_second_t maxVelocity = 1.0_mps;
+            constexpr units::meters_per_second_squared_t maxAcceleration = 1.0_mps_sq;
         }
     }
 }

@@ -11,6 +11,7 @@
 #include "subsystems/DriveBase.h"
 #include "subsystems/Elevator.h"
 #include "subsystems/Arm.h"
+#include "subsystems/Intake.h"
 
 class RobotContainer 
 {
@@ -24,10 +25,12 @@ class RobotContainer
     void ConfigureDriveControls();
 
     frc::XboxController m_driveController {0};
+    frc::XboxController m_intakeController {1};
 
     DriveBase m_driveBase {};
     Elevator m_elevator {};
     Arm m_arm {};
+    Intake m_intake{};
 
     std::unique_ptr<frc2::sysid::SysIdRoutine> m_sysIdRoutine;
 };

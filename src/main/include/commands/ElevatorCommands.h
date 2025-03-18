@@ -7,6 +7,6 @@
 
 namespace ElevatorCommands
 {
-    // Sets the arm to a specific height
-    frc2::CommandPtr SetHeight(Elevator* arm, Arm* arm, units::meter_t height);
+    // Sets the elevator to a specific height
+    frc2::CommandPtr SetHeight(Elevator* elevator, Arm* arm, units::meter_t height);
 }

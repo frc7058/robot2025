@@ -56,19 +56,6 @@ void Arm::Periodic()
 
     units::volt_t output = 0.0_V;
 
-
-    // if(AtReferencePosition())
-    //     fmt::print("Arm at zero\n");
-
-    // if limit switch is hit and arm going backwards, stop
-    // if (AtReferencePosition() && m_armMotor->Get() < 0)
-    // {
-    //     fmt::print("Zeroing arm\n");
-    //     Zero();
-    //     m_resetting = false;
-    //     m_armEncoder->SetPosition(0);
-    // }
-    // else 
     if(m_pid->AtGoal())
     {
         // fmt::print("At goal\n");
@@ -78,18 +65,36 @@ void Arm::Periodic()
     {
         output = outputFF + outputPID;
     }
+    
+    if(m_resetting)
+    {
+        output = m_feedforward->Calculate(currentAngle, -30_deg_per_s);
+    }
 
     // Clamp output voltage
     output = std::clamp(output, -constants::arm::maxVoltage, constants::arm::maxVoltage);
+
     SetVoltage(output);
 
-    // fmt::print("Error: {}\n", (units::degree_t { m_pid->GetPositionError() }).value());
-    // fmt::print("Arm angle: {}, Arm commanded angle: {}, Arm output voltage: {}, Arm velocity: {}, Arm commanded velocity: {}\n",
-    //     (units::degree_t { GetAngle() }).value(),
-    //     (units::degree_t { m_pid->GetGoal().position }).value(),
-    //     output.value(),
-    //     (units::degrees_per_second_t { m_armEncoder->GetVelocity() }).value(),
-    //     (units::degrees_per_second_t { m_pid->GetGoal().velocity }).value());
+    if (AtReferencePosition())
+    {
+        if (m_resetting)
+        {
+            fmt::print("Arm reset\n");
+            Zero();
+            SetTargetAngle(0_deg);
+        }
+
+        m_resetting = false;
+        m_armEncoder->SetPosition(0);
+    }
+
+    fmt::print("Arm angle: {}, Arm commanded angle: {}, Arm output voltage: {}, Arm velocity: {}, Arm commanded velocity: {}\n",
+        (units::degree_t { GetAngle() }).value(),
+        (units::degree_t { m_pid->GetGoal().position }).value(),
+        output.value(),
+        (units::degrees_per_second_t { m_armEncoder->GetVelocity() }).value(),
+        (units::degrees_per_second_t { m_pid->GetGoal().velocity }).value());
 
     frc::SmartDashboard::PutNumber("Arm angle", (units::degree_t { GetAngle() }).value());
     frc::SmartDashboard::PutNumber("Arm commanded angle", (units::degree_t { m_pid->GetGoal().position }).value());
@@ -113,7 +118,7 @@ void Arm::Reset()
         return;
 
     m_resetting = true;
-    m_armMotor->SetVoltage(constants::arm::resetVoltage);
+    // m_armMotor->SetVoltage(constants::arm::resetVoltage);
 }
 
 void Arm::StopResetting()
